@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS白名单追踪 - 使用示例</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        .code-block {
+            background: #f4f4f4;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .info-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .warning-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .step {
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 3px solid #2196F3;
+        }
+        .step-number {
+            background: #2196F3;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 JS白名单追踪功能使用示例</h1>
+        
+        <div class="info-box">
+            <strong>功能说明：</strong> JS白名单追踪功能允许你控制哪些用户可以访问特定的JavaScript文件。
+            基于用户的IP和User-Agent进行验证，并且这些信息会自动从服务器请求中获取，无需在JS中传输。
+        </div>
+
+        <h2>📋 功能特性</h2>
+        <ul class="feature-list">
+            <li>自动从请求中获取UA和IP，无需JS传输</li>
+            <li>支持异步非阻塞模式（defer/async）</li>
+            <li>可在config.py中完全开启/关闭</li>
+            <li>配置化TTL管理（默认60分钟）</li>
+            <li>双重认证方式：API Key（后端）+ HMAC签名（前端）</li>
+            <li>独立的签名密钥配置，签名有效期1小时</li>
+            <li>提供完整的API用于管理白名单</li>
+        </ul>
+
+        <h2>⚙️ 配置说明</h2>
+        <p>在 <code>models/config.py</code> 中添加以下配置：</p>
+        <div class="code-block">
+# JS白名单追踪功能配置<br>
+ENABLE_JS_WHITELIST_TRACKER = True  # 是否启用JS白名单追踪功能<br>
+JS_WHITELIST_TRACKER_TTL = 60 * 60  # JS访问追踪记录TTL（秒），默认60分钟<br>
+JS_WHITELIST_SECRET_KEY = b"js_whitelist_secret_key_change_this"  # JS白名单HMAC签名密钥（独立配置）<br>
+JS_WHITELIST_SIGNATURE_TTL = 60 * 60  # JS白名单签名有效期（秒），默认1小时
+        </div>
+
+        <h2>🚀 使用步骤</h2>
+        
+        <div class="step">
+            <span class="step-number">1A</span>
+            <strong>方式1: 后端服务器添加（使用API Key）</strong>
+            <div class="code-block" style="margin-top: 10px;">
+POST http://your-server:7889/api/js-whitelist<br>
+Headers:<br>
+&nbsp;&nbsp;Authorization: Bearer F2UkWEJZRBxC7<br>
+&nbsp;&nbsp;Content-Type: application/json<br>
+Body:<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"uid": "user123",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"jsPath": "static/js/app.js"<br>
+&nbsp;&nbsp;}
+            </div>
+            <div class="warning-box" style="margin-top: 10px;">
+                <strong>注意：</strong> 此方式适合后端服务器调用，不要在前端代码中暴露API Key！
+            </div>
+        </div>
+
+        <div class="step">
+            <span class="step-number">1B</span>
+            <strong>方式2: 前端安全调用（使用HMAC签名）</strong>
+            <div class="code-block" style="margin-top: 10px;">
+GET/POST http://your-server:7889/api/js-whitelist?uid=user123&js_path=static/js/app.js&expires=1234567890&sign=abc123...<br>
+<br>
+签名生成（在后端服务器上）:<br>
+&nbsp;&nbsp;message = "uid:js_path:expires"<br>
+&nbsp;&nbsp;signature = HMAC-SHA256(SECRET_KEY, message)<br>
+<br>
+支持GET和POST两种方法，GET方法可以直接在浏览器地址栏访问
+            </div>
+            <div class="info-box" style="margin-top: 10px;">
+                <strong>推荐：</strong> 前端调用时，先请求后端生成签名，然后使用签名调用FileProxy。GET方法更简单，可以直接访问URL！
+            </div>
+        </div>
+
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>在HTML页面中引用JS文件</strong>
+            <div class="code-block" style="margin-top: 10px;">
+&lt;!-- 方式1: 使用defer异步加载（推荐） --&gt;<br>
+&lt;script defer src="http://your-server:7889/static/js/app.js"&gt;&lt;/script&gt;<br>
+<br>
+&lt;!-- 方式2: 使用async异步加载 --&gt;<br>
+&lt;script async src="http://your-server:7889/static/js/utils.js"&gt;&lt;/script&gt;<br>
+<br>
+&lt;!-- 方式3: 普通同步加载 --&gt;<br>
+&lt;script src="http://your-server:7889/static/js/main.js"&gt;&lt;/script&gt;
+            </div>
+        </div>
+
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>访问流程说明</strong>
+            <ul style="margin-top: 10px;">
+                <li>用户浏览器访问HTML页面</li>
+                <li>浏览器解析到&lt;script&gt;标签，发起JS文件请求</li>
+                <li>FileProxy服务器接收请求，自动提取UA和IP</li>
+                <li>验证UA+IP是否在白名单中</li>
+                <li>如果在白名单中 → 返回JS文件内容</li>
+                <li>如果不在白名单中 → 返回403 Forbidden</li>
+            </ul>
+        </div>
+
+        <h2>🔍 API端点说明</h2>
+        
+        <h3>1. 添加JS白名单（双重认证）</h3>
+        <div class="code-block">
+POST /api/js-whitelist<br>
+<br>
+方式A - API Key（后端服务器）:<br>
+&nbsp;&nbsp;Header: Authorization: Bearer {API_KEY}<br>
+&nbsp;&nbsp;Body: {"uid": "用户ID", "jsPath": "JS文件路径"}<br>
+<br>
+方式B - HMAC签名（前端安全）:<br>
+&nbsp;&nbsp;Query: ?uid=用户ID&js_path=JS路径&expires=过期时间&sign=签名<br>
+&nbsp;&nbsp;签名 = HMAC-SHA256(SECRET_KEY, "uid:js_path:expires")
+        </div>
+
+        <h3>2. 检查白名单</h3>
+        <div class="code-block">
+GET /api/js-whitelist/check?js_path=路径&uid=用户ID<br>
+无需认证，自动使用请求的UA+IP验证
+        </div>
+
+        <h3>3. 查看统计</h3>
+        <div class="code-block">
+GET /api/js-whitelist/stats?uid=用户ID<br>
+需要API Key认证
+        </div>
+
+        <h2>💡 defer vs async vs 普通加载</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+            <tr style="background: #f4f4f4;">
+                <th style="padding: 10px; border: 1px solid #ddd;">加载方式</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">特点</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">推荐场景</th>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>defer</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">异步加载，按顺序执行，不阻塞页面解析</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">需要按顺序执行的脚本</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>async</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">异步加载，加载完立即执行，可能乱序</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">独立的工具脚本（如统计代码）</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>普通</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">同步加载，会阻塞页面解析</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">关键脚本，必须立即执行</td>
+            </tr>
+        </table>
+
+        <h2>📝 Python调用示例</h2>
+        <div class="code-block">
+import requests<br>
+<br>
+# 添加JS文件到白名单<br>
+response = requests.post(<br>
+&nbsp;&nbsp;'http://localhost:7889/api/js-whitelist',<br>
+&nbsp;&nbsp;headers={<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'Authorization': 'Bearer F2UkWEJZRBxC7',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'Content-Type': 'application/json'<br>
+&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;json={<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'uid': 'user123',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'jsPath': 'static/js/app.js'<br>
+&nbsp;&nbsp;}<br>
+)<br>
+<br>
+print(response.json())
+        </div>
+
+        <h2>🔗 相关链接</h2>
+        <ul>
+            <li><a href="/docs" target="_blank">API文档</a></li>
+            <li><a href="/monitor" target="_blank">监控面板</a></li>
+            <li><a href="https://github.com/e54385991/YuemPyScripts" target="_blank">项目仓库</a></li>
+        </ul>
+
+        <div class="info-box" style="margin-top: 30px;">
+            <strong>提示：</strong> 完整的使用示例请参考 <code>examples/js_whitelist_example.py</code> 文件。
+        </div>
+    </div>
+
+    <!-- 演示：使用defer加载脚本（如果JS文件存在且在白名单中） -->
+    <!-- <script defer src="/static/js/demo.js"></script> -->
+</body>
+</html>

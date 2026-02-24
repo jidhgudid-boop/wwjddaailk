@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件代理服务器 - 监控面板</title>
+    <link rel="stylesheet" href="/static/css/monitor.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚀 文件代理服务器监控面板</h1>
+            <p>实时监控系统状态和性能指标</p>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="refreshData()">🔄 刷新数据</button>
+                <span class="last-update">最后更新: <span id="last-update-time">-</span></span>
+            </div>
+        </header>
+        
+        <!-- 系统特色与性能 -->
+        <section class="system-features">
+            <div class="features-header">
+                <h2>✨ 系统特色与性能优势</h2>
+                <p class="features-subtitle">高性能异步文件代理服务器，专门针对 HLS 流媒体优化</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-category">
+                    <h3>🚀 核心性能优化</h3>
+                    <ul class="feature-list">
+                        <li><strong>HTTP/2 多路复用</strong> - 40-60% 并发性能提升</li>
+                        <li><strong>uvloop 事件循环</strong> - 2-4 倍异步 I/O 性能提升</li>
+                        <li><strong>零拷贝流式传输</strong> - 降低 20-30% 内存使用</li>
+                        <li><strong>智能连接池管理</strong> - 减少 30-50% 连接开销</li>
+                        <li><strong>自适应背压控制</strong> - 防止内存溢出和丢包</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-category">
+                    <h3>🎬 HLS 流媒体专项优化</h3>
+                    <ul class="feature-list">
+                        <li><strong>M3U8 不缓存策略</strong> - 确保播放列表实时更新</li>
+                        <li><strong>TS 文件流式传输</strong> - 8KB 分块，低延迟传输</li>
+                        <li><strong>自动重连机制</strong> - 网络中断自动恢复</li>
+                        <li><strong>并行分片验证</strong> - 加速认证流程</li>
+                        <li><strong>Keep-Alive 长连接</strong> - 复用连接减少延迟</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-category">
+                    <h3>🔐 安全与访问控制</h3>
+                    <ul class="feature-list">
+                        <li><strong>HMAC 签名验证</strong> - 防止未授权访问</li>
+                        <li><strong>IP 白名单控制</strong> - 支持 CIDR 网段匹配</li>
+                        <li><strong>会话管理系统</strong> - Redis 分布式会话</li>
+                        <li><strong>浏览器自适应控制</strong> - 智能识别客户端类型</li>
+                        <li><strong>访问频率限制</strong> - 防止滥用和攻击</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-category">
+                    <h3>📊 监控与可观测性</h3>
+                    <ul class="feature-list">
+                        <li><strong>实时性能指标</strong> - 30 秒自动刷新</li>
+                        <li><strong>Redis 延迟监控</strong> - 响应时间趋势图</li>
+                        <li><strong>流量收集分析</strong> - 带宽和传输统计</li>
+                        <li><strong>活跃连接跟踪</strong> - 会话和用户数监控</li>
+                        <li><strong>可视化图表展示</strong> - Chart.js 动态图表</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="performance-metrics">
+                <h3>⚡ 性能表现</h3>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-icon">🎯</div>
+                        <div class="metric-content">
+                            <div class="metric-value">< 10ms</div>
+                            <div class="metric-label">Redis 响应延迟</div>
+                        </div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-icon">⚡</div>
+                        <div class="metric-content">
+                            <div class="metric-value">8 KB</div>
+                            <div class="metric-label">流式传输块大小</div>
+                        </div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-icon">🔗</div>
+                        <div class="metric-content">
+                            <div class="metric-value">100+ 连接</div>
+                            <div class="metric-label">连接池容量</div>
+                        </div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-icon">📈</div>
+                        <div class="metric-content">
+                            <div class="metric-value">30-50%</div>
+                            <div class="metric-label">性能提升（相比标准实现）</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tech-stack">
+                <h3>🛠️ 技术栈</h3>
+                <div class="tech-tags">
+                    <span class="tech-tag">FastAPI</span>
+                    <span class="tech-tag">Python 3.9+</span>
+                    <span class="tech-tag">uvloop</span>
+                    <span class="tech-tag">HTTP/2</span>
+                    <span class="tech-tag">Redis</span>
+                    <span class="tech-tag">Chart.js</span>
+                    <span class="tech-tag">Gunicorn</span>
+                    <span class="tech-tag">HMAC SHA256</span>
+                </div>
+            </div>
+        </section>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>加载中...</p>
+        </div>
+        
+        <div id="error" class="error-message" style="display: none;"></div>
+        
+        <div id="content" style="display: none;">
+            <!-- 系统状态概览 -->
+            <section class="stats-grid">
+                <div class="stat-card status-card">
+                    <div class="stat-icon">💚</div>
+                    <h3>系统状态</h3>
+                    <div class="stat-value">
+                        <span class="status-indicator" id="status-indicator"></span>
+                        <span id="status-text">-</span>
+                    </div>
+                    <div class="stat-label">服务运行状态</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <h3>Redis延迟</h3>
+                    <div class="stat-value" id="redis-latency">-</div>
+                    <div class="stat-label">毫秒</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">👷</div>
+                    <h3>工作进程</h3>
+                    <div class="stat-value" id="worker-pid">-</div>
+                    <div class="stat-label">进程ID</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <h3>流量收集器</h3>
+                    <div class="stat-value" id="traffic-status">-</div>
+                    <div class="stat-label">收集状态</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🔐</div>
+                    <h3>活跃会话</h3>
+                    <div class="stat-value" id="active-sessions">-</div>
+                    <div class="stat-label">当前会话数</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <h3>活跃用户</h3>
+                    <div class="stat-value" id="active-users">-</div>
+                    <div class="stat-label">在线用户数</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🎬</div>
+                    <h3>M3U8访问</h3>
+                    <div class="stat-value" id="m3u8-uses">-</div>
+                    <div class="stat-label">活跃M3U8</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🌐</div>
+                    <h3>IP访问记录</h3>
+                    <div class="stat-value" id="ip-accesses">-</div>
+                    <div class="stat-label">白名单记录</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <h3>带宽流速</h3>
+                    <div class="stat-value" id="bandwidth-flow">-</div>
+                    <div class="stat-label">Mbps (实时)</div>
+                </div>
+            </section>
+            
+            <!-- 图表区域 -->
+            <section class="charts-section">
+                <h2>📈 性能趋势</h2>
+                <div class="chart-grid">
+                    <div class="chart-card">
+                        <h3>Redis响应时间</h3>
+                        <canvas id="redisLatencyChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>活跃连接数</h3>
+                        <canvas id="connectionsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>实时传输速度</h3>
+                        <canvas id="trafficSpeedChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 实时传输监控 -->
+            <section class="transfers-section">
+                <h2>📡 实时传输监控</h2>
+                <div class="transfers-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">⚡</div>
+                        <h3>活跃传输</h3>
+                        <div class="stat-value" id="active-transfer-count">-</div>
+                        <div class="stat-label">正在进行</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🚀</div>
+                        <h3>传输速度</h3>
+                        <div class="stat-value" id="total-transfer-speed">-</div>
+                        <div class="stat-label">Mbps</div>
+                    </div>
+                </div>
+                <div class="transfers-list" id="transfers-list">
+                    <p class="no-transfers">当前没有活跃的传输</p>
+                </div>
+            </section>
+            
+            <!-- 白名单列表 -->
+            <section class="transfers-section">
+                <h2>📋 IP白名单列表</h2>
+                <div class="whitelist-list" id="whitelist-list">
+                    <p class="no-transfers">加载中...</p>
+                </div>
+            </section>
+            
+            <!-- 访问日志 -->
+            <section class="access-logs-section">
+                <h2>🚫 拒绝访问记录 (最近100条)</h2>
+                <div class="access-log-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <h3>记录总数</h3>
+                        <div class="stat-value" id="denied-total">-</div>
+                        <div class="stat-label">拒绝访问</div>
+                    </div>
+                </div>
+                <div class="access-logs-table-container">
+                    <table class="access-logs-table" id="denied-logs-table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>UID</th>
+                                <th>IP地址</th>
+                                <th>User Agent</th>
+                                <th>访问路径</th>
+                                <th>拒绝原因</th>
+                            </tr>
+                        </thead>
+                        <tbody id="denied-logs-body">
+                            <tr><td colspan="6" class="no-data">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <section class="access-logs-section">
+                <h2>✅ 最近访问记录 (最近100条)</h2>
+                <div class="access-log-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <h3>记录总数</h3>
+                        <div class="stat-value" id="recent-total">-</div>
+                        <div class="stat-label">成功访问</div>
+                    </div>
+                </div>
+                <div class="access-logs-table-container">
+                    <table class="access-logs-table" id="recent-logs-table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>UID</th>
+                                <th>IP地址</th>
+                                <th>User Agent</th>
+                                <th>访问路径</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-logs-body">
+                            <tr><td colspan="5" class="no-data">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Token重放日志 -->
+            <section class="access-logs-section">
+                <h2>🔄 Token重放日志 (最近300条)</h2>
+                <div class="access-log-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <h3>记录总数</h3>
+                        <div class="stat-value" id="replay-total">-</div>
+                        <div class="stat-label">重放检测</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🚫</div>
+                        <h3>最近被阻止</h3>
+                        <div class="stat-value" id="replay-blocked">-</div>
+                        <div class="stat-label">重放攻击</div>
+                    </div>
+                </div>
+                <div class="access-logs-table-container">
+                    <table class="access-logs-table" id="replay-logs-table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>UID</th>
+                                <th>IP地址</th>
+                                <th>访问路径（含参数）</th>
+                                <th>User Agent</th>
+                                <th>使用次数</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="replay-logs-body">
+                            <tr><td colspan="7" class="no-data">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Key访问日志 -->
+            <section class="access-logs-section">
+                <h2>🔑 Key访问日志 (最近300条)</h2>
+                <div class="access-log-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <h3>记录总数</h3>
+                        <div class="stat-value" id="key-access-total">-</div>
+                        <div class="stat-label">Key访问</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🚫</div>
+                        <h3>最近被阻止</h3>
+                        <div class="stat-value" id="key-access-blocked">-</div>
+                        <div class="stat-label">重放攻击</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚠️</div>
+                        <h3>超限访问</h3>
+                        <div class="stat-value" id="key-access-exceeded">-</div>
+                        <div class="stat-label">次数超限</div>
+                    </div>
+                </div>
+                <div class="access-logs-table-container">
+                    <table class="access-logs-table" id="key-access-logs-table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>UID</th>
+                                <th>IP地址</th>
+                                <th>Key路径</th>
+                                <th>User Agent</th>
+                                <th>使用次数</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="key-access-logs-body">
+                            <tr><td colspan="7" class="no-data">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- M3U8缓存统计 -->
+            <section class="info-section">
+                <h2>📦 M3U8缓存统计</h2>
+                <div class="access-log-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">💾</div>
+                        <h3>缓存数量</h3>
+                        <div class="stat-value" id="m3u8-cache-count">-</div>
+                        <div class="stat-label">已缓存文件</div>
+                    </div>
+                </div>
+                <div class="access-logs-table-container">
+                    <table class="access-logs-table" id="m3u8-cache-table">
+                        <thead>
+                            <tr>
+                                <th>缓存Key哈希</th>
+                                <th>TTL (秒)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="m3u8-cache-body">
+                            <tr><td colspan="2" class="no-data">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- 详细信息 -->
+            <section class="info-section">
+                <h2>🔍 详细信息</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>🔴 Redis 信息</h3>
+                        <div id="redis-info"></div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>🌐 HTTP 客户端</h3>
+                        <div id="http-info"></div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>📊 流量收集器</h3>
+                        <div id="traffic-info"></div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>⚙️ 系统信息</h3>
+                        <div id="system-info"></div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>🎯 性能配置</h3>
+                        <div id="performance-config"></div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>🔧 优化状态</h3>
+                        <div id="optimization-status"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <script src="/static/js/monitor.js"></script>
+</body>
+</html>

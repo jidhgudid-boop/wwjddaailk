@@ -1,0 +1,19 @@
+# FastAPI 核心（替代 aiohttp）
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# HTTP 客户端（异步，支持 HTTP/2）
+httpx[http2]>=0.25.0
+
+# Redis 异步客户端
+redis>=4.5.0
+
+# 异步文件 I/O（用于文件系统后端模式）
+aiofiles>=23.2.0
+
+# 性能优化
+uvloop>=0.19.0  # 高性能事件循环，显著提升异步I/O性能
+
+# 其他依赖
+python-multipart>=0.0.6  # 用于文件上传
+gunicorn>=21.2.0  # 用于生产环境部署
